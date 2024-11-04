@@ -1,8 +1,6 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { verifyGoogleToken } = require("../utils/google.strategy.js");
-const userModel = require("../models/userModel.js");
 const { status } = require("../utils/system.roles.js");
 const { generateToken } = require("../middelware/GenerateAndVerifyToken.js");
 
@@ -44,67 +42,65 @@ const login = async (req, res) => {
 };
 
 const loginWithGoogle = async (req, res) => {
-  async (req, res) => {
-    // const { idToken } = req.body;
-    const idToken = req.headers["id-token"];
-    try {
-      const userData = await verifyGoogleToken(idToken);
-      // Proceed with your app’s logic using `userData`
-      if (userData.email_verified !== true) {
-        return res
-          .status(400)
-          .json({ error: "Email is not verified , try valid google email" });
-      }
-
-      //check data by email
-      const user = await userModel.findOne({
-        email: userData.email,
-        provider: "GOOGLE",
-      });
-      if (!user) return next(new Error("User Not found", { cause: 404 }));
-      //generate token
-      const token = generateToken({
-        payload: { userId: user._id, email: userData.email },
-        expiresIn: 40,
-      });
-      //update the status to online
-      user.status = status.online;
-      user.token = token;
-      await user.save();
-
-      res
-        .status(200)
-        .json({ message: "login successfully with google", result });
-
-      // {
-      //   "sub": "1234567890",
-      //   "name": "John Doe",
-      //   "given_name": "John",
-      //   "family_name": "Doe",
-      //   "picture": "https://example.com/johndoe.jpg",
-      //   "email": "johndoe@example.com",
-      //   "email_verified": true,
-      //   "locale": "en"
-      // }
-
-      // Example logic: Check if user exists in DB
-      // const user = await User.findOne({ googleId: userData.sub });
-      // if (!user) {
-      //   // Create new user in DB
-      //   const newUser = new User({
-      //     googleId: userData.sub,
-      //     name: userData.name,
-      //     email: userData.email,
-      //     picture: userData.picture,
-      //   });
-      //   await newUser.save();
-      // }
-      res.json(userData);
-    } catch (error) {
-      res.status(401).json({ error: "Invalid token" });
+  // const { idToken } = req.body;
+  const idToken = req.headers["id-token"];
+  try {
+    const userData = await verifyGoogleToken(idToken);
+    // Proceed with your app’s logic using `userData`
+    if (userData.email_verified !== true) {
+      return res
+        .status(400)
+        .json({ error: "Email is not verified , try valid google email" });
     }
-  };
+
+    //check data by email
+    const user = await User.findOne({
+      email: userData.email,
+      provider: "GOOGLE",
+    });
+    if (!user) return next(new Error("User Not found", { cause: 404 }));
+    //generate token
+    const token = generateToken({
+      payload: { userId: user._id, email: userData.email },
+      expiresIn: 40,
+    });
+    //update the status to online
+    user.status = status.online;
+    user.token = token;
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "login successfully with google", userData });
+
+    // {
+    //   "sub": "1234567890",
+    //   "name": "John Doe",
+    //   "given_name": "John",
+    //   "family_name": "Doe",
+    //   "picture": "https://example.com/johndoe.jpg",
+    //   "email": "johndoe@example.com",
+    //   "email_verified": true,
+    //   "locale": "en"
+    // }
+
+    // Example logic: Check if user exists in DB
+    // const user = await User.findOne({ googleId: userData.sub });
+    // if (!user) {
+    //   // Create new user in DB
+    //   const newUser = new User({
+    //     googleId: userData.sub,
+    //     name: userData.name,
+    //     email: userData.email,
+    //     picture: userData.picture,
+    //   });
+    //   await newUser.save();
+    // }
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
 };
+
 module.exports = {
   register,
   login,

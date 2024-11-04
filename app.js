@@ -6,7 +6,6 @@ const morgan = require("morgan");
 const session = require("express-session");
 require("dotenv").config();
 
-const { Passport } = require("./utils/passport.js");
 const {userRouter} = require("./routers/userRouter.js");
 port = process.env.PORT || 3000;
 const mongoUrl = process.env.MONGO_URI;
@@ -21,8 +20,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(Passport.initialize());
-app.use(Passport.session());
 app.use("/auth", userRouter);
 
 mongoose
