@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   token: String,
   provider: {
     type: String,
-    enum: [ "System","GOOGLE","Facebook"],
+    enum: [ "System","GOOGLE","GITHUB","FACEBOOK"],
     default: "System",
   },
 });

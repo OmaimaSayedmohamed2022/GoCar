@@ -1,29 +1,23 @@
-import express from 'express';
-import { register, login, loginWithGoogle } from '../controllers/userController.js';
-import { registerValidation,loginValidation } from '../middelware/validation.js';
-import { validationResult } from 'express-validator';
+import express from "express";
+import {
+  login,
+  loginWithOAuth,
+  register,
+} from "../controllers/userController.js";
+import {
+  registerValidation,
+  loginValidation,
+} from "../middelware/validation.js";
 
 const router = express.Router();
 
 // Registration router
-router.post('/register', registerValidation, (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    register(req, res);
-});
+router.post("/register", registerValidation, login);
 
 // Login router
-router.post('/login', loginValidation, (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    login(req, res);
-});
+router.post("/login", loginValidation, register);
 
 // login with google router
-router.post("/login/google",loginWithGoogle );
+router.post("/login/google", loginWithOAuth);
 
 export default router;
