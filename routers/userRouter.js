@@ -3,6 +3,7 @@ import {
   login,
   loginWithOAuth,
   register,
+  signupWithOAuth,
 } from "../controllers/userController.js";
 import {
   registerValidation,
@@ -19,5 +20,8 @@ router.post("/login", loginValidation, register);
 
 // login with google router
 router.post("/login/google", loginWithOAuth);
+
+// sign-up with google router
+router.post("/sign-up/google", signupWithOAuth);
 
 export default router;

@@ -65,6 +65,16 @@ const verifyToken = async (provider, token) => {
   switch (provider) {
     case "GOOGLE":
       return await verifyGoogleToken(token);
+          // {
+    //   "sub": "1234567890",
+    //   "name": "John Doe",
+    //   "given_name": "John",
+    //   "family_name": "Doe",
+    //   "picture": "https://example.com/johndoe.jpg",
+    //   "email": "johndoe@example.com",
+    //   "email_verified": true,
+    //   "locale": "en"
+    // }
     case "FACEBOOK":
       // Verify token with Facebook's API
       const fbResponse = await fetch(
@@ -72,6 +82,20 @@ const verifyToken = async (provider, token) => {
       );
       if (!fbResponse.ok) throw new Error("Invalid Facebook token");
       return await fbResponse.json();
+      // {
+      //   "id": "1234567890123456",
+      //   "name": "John Doe",
+      //   "email": "johndoe@example.com",
+      //   "picture": {
+      //     "data": {
+      //       "height": 50,
+      //       "is_silhouette": false,
+      //       "url": "https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1234567890123456&height=50&width=50&ext=1668393542&hash=AeTfP_YfPGrxZQZ3",
+      //       "width": 50
+      //     }
+      //   }
+      // }
+      
     case "GITHUB":
       // Verify token with GitHub's API
       const ghResponse = await fetch("https://api.github.com/user", {
@@ -228,16 +252,16 @@ export const signupWithOAuth = async (req, res, next) => {
 //       .status(200)
 //       .json({ message: "login successfully with google", userData });
 
-//     // {
-//     //   "sub": "1234567890",
-//     //   "name": "John Doe",
-//     //   "given_name": "John",
-//     //   "family_name": "Doe",
-//     //   "picture": "https://example.com/johndoe.jpg",
-//     //   "email": "johndoe@example.com",
-//     //   "email_verified": true,
-//     //   "locale": "en"
-//     // }
+    // {
+    //   "sub": "1234567890",
+    //   "name": "John Doe",
+    //   "given_name": "John",
+    //   "family_name": "Doe",
+    //   "picture": "https://example.com/johndoe.jpg",
+    //   "email": "johndoe@example.com",
+    //   "email_verified": true,
+    //   "locale": "en"
+    // }
 
 //       // Example logic: Check if user exists in DB
 //       // const user = await User.findOne({ googleId: userData.sub });
