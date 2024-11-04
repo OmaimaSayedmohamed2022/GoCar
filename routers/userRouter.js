@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login } from '../controllers/userController.js';
+import { register, login, loginWithGoogle } from '../controllers/userController.js';
 import { registerValidation,loginValidation } from '../middelware/validation.js';
 import { validationResult } from 'express-validator';
 
@@ -24,6 +24,6 @@ router.post('/login', loginValidation, (req, res) => {
 });
 
 // login with google router
-router.post("/login/google",userController.loginWithGoogle );
+router.post("/login/google",loginWithGoogle );
 
 export default router;

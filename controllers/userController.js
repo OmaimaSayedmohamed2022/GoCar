@@ -1,6 +1,9 @@
 import User from'../models/userModel.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { verifyGoogleToken } from '../utils/google.strategy.js';
+import { generateToken } from '../middelware/GenerateAndVerifyToken.js';
+import { status } from '../utils/system.roles.js';
 
 export const register = async (req, res) => {
     try {
