@@ -16,11 +16,11 @@ import { requestPasswordReset, verifyCode, resetPassword } from '../controllers/
 
 const router = express.Router();
 
-// Registration router
-router.post("/register", registerValidation, login);
+// Registration Route
+router.post('/register', registerValidation,validatorHandlerMiddleware, register);
 
-// Login router
-router.post("/login", loginValidation, register);
+// Login Route
+router.post('/login', loginValidation, validatorHandlerMiddleware, login);
 
 // login with google router
 router.post("/login/google", loginWithOAuth);
