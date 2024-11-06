@@ -9,6 +9,20 @@ async function verifyGoogleToken(idToken) {
   return ticket.getPayload();
 }
 
+import fetch from 'node-fetch';
+
+async function getGoogleUserProfile(accessToken) {
+  const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,photos', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch user profile from Google People API');
+  return await response.json();
+}
+
 export {
   verifyGoogleToken,
+  getGoogleUserProfile
 };
