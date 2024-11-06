@@ -4,6 +4,12 @@ import jwt from "jsonwebtoken";
 import { verifyGoogleToken } from "../utils/google.strategy.js";
 import { generateToken } from "../middelware/GenerateAndVerifyToken.js";
 import { status } from "../utils/system.roles.js";
+import User from "../models/userModel.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { verifyGoogleToken } from "../utils/google.strategy.js";
+import { generateToken } from "../middelware/GenerateAndVerifyToken.js";
+import { status } from "../utils/system.roles.js";
 
 export const register = async (req, res) => {
   try {
@@ -13,7 +19,31 @@ export const register = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
+  try {
+    const { userName, email, password, confirmPassword, phone, role } =
+      req.body;
 
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      userName,
+      email,
+      phone,
+      role,
+      password: hashedPassword,
+    });
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered successfully", newUser });
+  } catch (error) {
+    console.log("new user register error", error);
+    res
+      .status(404)
+      .json({ message: "new user register error", error: error.message });
+  }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       userName,
@@ -41,7 +71,18 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid password" });
@@ -225,18 +266,56 @@ export const signupWithOAuth = async (req, res, next) => {
   }
 };
 
-export const loginWithGoogle = async (req, res) => {
-  async (req, res) => {
-    // const { idToken } = req.body;
-    const idToken = req.headers["id-token"];
-    try {
-      const userData = await verifyGoogleToken(idToken);
-      // Proceed with your app’s logic using `userData`
-      if (userData.email_verified !== true) {
-        return res
-          .status(400)
-          .json({ error: "Email is not verified , try valid google email" });
-      }
+// Utility function to verify tokens based on provider
+const verifyToken = async (provider, token) => {
+  switch (provider) {
+    case "GOOGLE":
+      return await verifyGoogleToken(token);
+    case "FACEBOOK":
+      // Verify token with Facebook's API
+      const fbResponse = await fetch(
+        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture`
+      );
+      if (!fbResponse.ok) throw new Error("Invalid Facebook token");
+      return await fbResponse.json();
+    case "GITHUB":
+      // Verify token with GitHub's API
+      const ghResponse = await fetch("https://api.github.com/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!ghResponse.ok) throw new Error("Invalid GitHub token");
+      return await ghResponse.json();
+    // ghResponse >> {
+    //   "login": "octocat",
+    //   "id": 1,
+    //   "node_id": "MDQ6VXNlcjE=",
+    //   "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+    //   "gravatar_id": "",
+    //   "url": "https://api.github.com/users/octocat",
+    //   "html_url": "https://github.com/octocat",
+    //   "followers_url": "https://api.github.com/users/octocat/followers",
+    //   ...
+    // }
+
+    default:
+      throw new Error("Unknown provider");
+  }
+};
+
+export const loginWithOAuth = async (req, res, next) => {
+  const provider = req.headers["provider"]; // Expecting GOOGLE, FACEBOOK, or GITHUB
+  const token = req.headers["id-token"]; // Token can be an idToken or accessToken depending on provider
+
+  try {
+    // Step 1: Verify Token
+    const userData = await verifyToken(provider, token);
+
+    // Step 2: Check for required fields (Example: email verification for Google)
+    if (provider === "GOOGLE" && userData.email_verified !== true) {
+      return res
+        .status(400)
+        .json({ error: "Email not verified. Use a verified Google account." });
+    }
 
       //check data by email
       const user = await User.findOne({
