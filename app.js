@@ -2,7 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import userRouter from "./routers/userRouter.js";
 import { connectDB } from "./dbConnection/mongoose.js";
-import cors from "cors";
+
+// import cors from "cors";
+
 import morgan from "morgan";
 
 dotenv.config();
@@ -12,7 +14,9 @@ const port = process.env.PORT || 3001;
 
 connectDB();
 
-app.use(cors);
+
+// app.use(cors);
+
 app.use(morgan("dev"));
 // app.use(
 //   session({
@@ -23,6 +27,8 @@ app.use(morgan("dev"));
 // );
 
 app.use(express.json());
+
+
 app.use("/auth", userRouter);
 
 /* Start server */
@@ -57,3 +63,4 @@ const shutdown = () => {
 
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
+
