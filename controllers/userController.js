@@ -162,6 +162,7 @@ export const signupWithOAuth = async (req, res, next) => {
   try {
     // Step 1: Verify Token
     const userData = await verifyToken(provider, token);
+console.log("userData>> ",userData);
 
     // Step 2: Check for required fields (Example: email verification for Google)
     if (provider === "GOOGLE" && userData.email_verified !== true) {
