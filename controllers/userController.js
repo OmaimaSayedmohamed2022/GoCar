@@ -64,6 +64,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -71,18 +72,8 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+   
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid password" });
@@ -99,109 +90,9 @@ export const login = async (req, res) => {
       .status(500)
       .send({ message: "Error in login", error: error.message });
   }
-};
+}
 
-// Utility function to verify tokens based on provider
-const verifyToken = async (provider, token) => {
-  switch (provider) {
-    case "GOOGLE":
-      return await verifyGoogleToken(token);
-    // {
-    //   "sub": "1234567890",
-    //   "name": "John Doe",
-    //   "given_name": "John",
-    //   "family_name": "Doe",
-    //   "picture": "https://example.com/johndoe.jpg",
-    //   "email": "johndoe@example.com",
-    //   "email_verified": true,
-    //   "locale": "en"
-    // }
-    case "FACEBOOK":
-      // Verify token with Facebook's API
-      const fbResponse = await fetch(
-        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture`
-      );
-      if (!fbResponse.ok) throw new Error("Invalid Facebook token");
-      return await fbResponse.json();
-    // {
-    //   "id": "1234567890123456",
-    //   "name": "John Doe",
-    //   "email": "johndoe@example.com",
-    //   "picture": {
-    //     "data": {
-    //       "height": 50,
-    //       "is_silhouette": false,
-    //       "url": "https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1234567890123456&height=50&width=50&ext=1668393542&hash=AeTfP_YfPGrxZQZ3",
-    //       "width": 50
-    //     }
-    //   }
-    // }
 
-    case "GITHUB":
-      // Verify token with GitHub's API
-      const ghResponse = await fetch("https://api.github.com/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!ghResponse.ok) throw new Error("Invalid GitHub token");
-      return await ghResponse.json();
-    // ghResponse >> {
-    //   "login": "octocat",
-    //   "id": 1,
-    //   "node_id": "MDQ6VXNlcjE=",
-    //   "avatar_url": "https://github.com/images/error/octocat_happy.gif",
-    //   "gravatar_id": "",
-    //   "url": "https://api.github.com/users/octocat",
-    //   "html_url": "https://github.com/octocat",
-    //   "followers_url": "https://api.github.com/users/octocat/followers",
-    //   ...
-    // }
-
-    default:
-      throw new Error("Unknown provider");
-  }
-};
-
-export const loginWithOAuth = async (req, res, next) => {
-  console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-  
-  const provider = req.headers["provider"]; // Expecting GOOGLE, FACEBOOK, or GITHUB
-  const token = req.headers["id-token"]; // Token can be an idToken or accessToken depending on provider
-
-  try {
-    // Step 1: Verify Token
-    const userData = await verifyToken(provider, token);
-    console.log("userData>> ", userData);
-
-    // Step 2: Optionally fetch additional data from Google People API
-    const profileData = await getGoogleUserProfile(userData.accessToken);
-    console.log("profileData>> ", profileData);
-
-    // Step 2: Check for required fields (Example: email verification for Google)
-    if (provider === "GOOGLE" && userData.email_verified !== true) {
-      return res
-        .status(400)
-        .json({ error: "Email not verified. Use a verified Google account." });
-    }
-
-    // Step 3: Check if user exists in database
-    const user = await User.findOne({ email: userData.email, provider });
-    if (!user) return next(new Error("User Not found", { cause: 404 }));
-
-    // Step 4: Generate JWT and update user status
-    const jwtToken = generateToken({
-      payload: { userId: user._id, email: userData.email },
-      expiresIn: "1h",
-    });
-    user.status = status.online;
-    user.token = jwtToken;
-    await user.save();
-
-    // Respond with login success and user data
-    res.status(200).json({ message: "Login successful", userData });
-  } catch (error) {
-    res.status(401).json({ error: `ERROR ${error.message}` || "Invalid token" });
-  }
-};
 
 export const signupWithOAuth = async (req, res, next) => {
   const provider = req.headers["provider"]; // Expecting GOOGLE, FACEBOOK, or GITHUB
@@ -365,7 +256,7 @@ export const loginWithOAuth = async (req, res, next) => {
       res.status(401).json({ error: "Invalid token" });
     }
   };
-};
+
 // module.exports = {
 //   register,
 //   login,
