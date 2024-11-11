@@ -2,7 +2,6 @@ import express from "express";
 import {
   register,
   login,
-  loginWithGoogle,
   signupWithOAuth,
   loginWithOAuth,
 } from "../controllers/userController.js";
