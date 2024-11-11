@@ -38,7 +38,6 @@ router.post(
   loginWithOAuth
 );
 
-router.post("/sign-up/google", signupWithOAuth);
 
 // sign-up with google router
 router.post("/sign-up/google", signupWithOAuth);
