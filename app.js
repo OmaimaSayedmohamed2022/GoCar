@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import userRouter from "./routers/userRouter.js";
 import { connectDB } from "./dbConnection/mongoose.js";
 
+
 // import cors from "cors";
+
 
 import morgan from "morgan";
 
@@ -15,7 +17,9 @@ const port = process.env.PORT || 3001;
 connectDB();
 
 
+
 // app.use(cors);
+
 
 app.use(morgan("dev"));
 // app.use(
@@ -27,6 +31,9 @@ app.use(morgan("dev"));
 // );
 
 app.use(express.json());
+
+
+app.use("/auth", userRouter);
 
 
 app.use("/auth", userRouter);

@@ -2,8 +2,11 @@ import express from "express";
 import {
   register,
   login,
+  
   signupWithOAuth,
   loginWithOAuth,
+
+
 } from "../controllers/userController.js";
 import {
   registerValidation,
@@ -11,25 +14,19 @@ import {
 } from "../middelware/validation.js";
 import { validationResult } from "express-validator";
 
+import {validatorHandlerMiddleware} from '../middelware/validatorHandlerMiddleware.js'
+import { userAuth } from '../middelware/userMiddleware.js';
+import { requestPasswordReset, verifyCode, resetPassword } from '../controllers/forgetPassword.js';
+
 const router = express.Router();
 
-// Registration router
-router.post("/register", registerValidation, (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  register(req, res);
-});
 
-// Login router
-router.post("/login", loginValidation, (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  login(req, res);
-});
+// Registration Route
+router.post('/register', registerValidation,validatorHandlerMiddleware, register);
+
+// Login Route
+router.post('/login', loginValidation, validatorHandlerMiddleware, login);
+
 
 // login with google router
 router.post(
@@ -41,6 +38,17 @@ router.post(
   loginWithOAuth
 );
 
+
+// sign-up with google router
 router.post("/sign-up/google", signupWithOAuth);
+
+// request for reset password router
+router.post('/forget-password',userAuth, requestPasswordReset);
+
+// verify code router
+router.post('/verify-code', verifyCode);
+
+//reset new password router
+router.post('/reset-password',userAuth,loginValidation, resetPassword);
 
 export default router;

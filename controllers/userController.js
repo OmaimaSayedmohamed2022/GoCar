@@ -93,7 +93,8 @@ export const signupWithOAuth = async (req, res, next) => {
   try {
     // Step 1: Verify Token
     const userData = await verifyToken(provider, token);
-    console.log("userData>> ", userData);
+
+console.log("userData>> ",userData);
 
     // Step 2: Check for required fields (Example: email verification for Google)
     if (provider === "GOOGLE" && userData.email_verified !== true) {
@@ -149,41 +150,7 @@ export const signupWithOAuth = async (req, res, next) => {
   }
 };
 
-// Utility function to verify tokens based on provider
-const verifyToken = async (provider, token) => {
-  switch (provider) {
-    case "GOOGLE":
-      return await verifyGoogleToken(token);
-    case "FACEBOOK":
-      // Verify token with Facebook's API
-      const fbResponse = await fetch(
-        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,picture`
-      );
-      if (!fbResponse.ok) throw new Error("Invalid Facebook token");
-      return await fbResponse.json();
-    case "GITHUB":
-      // Verify token with GitHub's API
-      const ghResponse = await fetch("https://api.github.com/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!ghResponse.ok) throw new Error("Invalid GitHub token");
-      return await ghResponse.json();
-    // ghResponse >> {
-    //   "login": "octocat",
-    //   "id": 1,
-    //   "node_id": "MDQ6VXNlcjE=",
-    //   "avatar_url": "https://github.com/images/error/octocat_happy.gif",
-    //   "gravatar_id": "",
-    //   "url": "https://api.github.com/users/octocat",
-    //   "html_url": "https://github.com/octocat",
-    //   "followers_url": "https://api.github.com/users/octocat/followers",
-    //   ...
-    // }
 
-    default:
-      throw new Error("Unknown provider");
-  }
-};
 
 export const loginWithOAuth = async (req, res, next) => {
   const provider = req.headers["provider"]; // Expecting GOOGLE, FACEBOOK, or GITHUB
