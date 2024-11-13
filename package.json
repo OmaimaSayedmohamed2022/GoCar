@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon  app.js"
+    "start":"node index.js"
   },
   "keywords": [],
   "author": "",
+   "engines": {
+    "node": "22.11.0"
+  },
   "license": "ISC",
   "description": "",
   "dependencies": {
