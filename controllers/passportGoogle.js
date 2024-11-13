@@ -11,8 +11,7 @@ passport.use(new GoogleStrategy(
     scope: ['profile', 'email'],
   },
   function(accessToken, refreshToken, profile, cb) {
-    return cb(null, profile); // Pass profile directly
-  }
+    return cb(null, profile); 
 ));
 
 
