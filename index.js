@@ -36,10 +36,6 @@ app.get('/', (req, res) => {
 
 app.use(express.json());
 
-
-app.use("/auth", userRouter);
-
-
 app.use("/auth", userRouter);
 
 /* Start server */
