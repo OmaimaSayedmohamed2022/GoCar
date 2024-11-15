@@ -30,8 +30,8 @@ app.use(morgan("dev"));
 //   })
 // );
 
-app.get('/desired-route', (req, res) => {
-    res.send('Route works!');
+app.get('/', (req, res) => {
+    res.send('hello world!');
 });
 
 app.use(express.json());
