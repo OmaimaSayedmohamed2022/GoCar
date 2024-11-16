@@ -2,12 +2,14 @@ import express from "express";
 import dotenv from "dotenv";
 import userRouter from "./routers/userRouter.js";
 import { connectDB } from "./dbConnection/mongoose.js";
-
-
-// import cors from "cors";
-
-
+import session from 'express-session';
+import passport from 'passport';
+import passportFacebook from './routers/passportFacebookRouter.js';
+import passportGoogle from './routers/passportGoogleRouter.js';
+import cors from 'cors'
 import morgan from "morgan";
+
+
 
 dotenv.config();
 
@@ -16,10 +18,10 @@ const port = process.env.PORT || 3001;
 
 connectDB();
 
-
-
-// app.use(cors);
-
+// Initialize Passport and Passport Session Middleware
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(cors())
 
 app.use(morgan("dev"));
 // app.use(
@@ -35,8 +37,20 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.json());
-
 app.use("/auth", userRouter);
+app.use('/auth/google', passportGoogle);
+app.use('/auth/facebook', passportFacebook);
+
+// Passport Serialization
+passport.serializeUser((user, done) => done(null, user.id)); // Serialize only the user ID
+
+passport.deserializeUser((id, done) => {
+  User.findById(id, (err, user) => {
+    done(err, user);
+  });
+});
+
+
 
 /* Start server */
 const serverListen = app.listen(port, () => {
